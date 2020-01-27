@@ -1,0 +1,45 @@
+- name: Creating prometheus user group
+  group: name="promG"
+  become: true
+  
+- name: Creating prometheus user
+  user:
+    name: "promU"
+    group: "promG"
+    system: yes
+    shell: "/sbin/nologin"
+    comment: "promU nologin User"
+    createhome: "no"
+    state: present
+	
+- name: Install prometheus
+  unarchive:
+    src: "https://github.com/prometheus/prometheus/releases/download/v2.8.1/prometheus-2.8.1.linux-amd64.tar.gz"
+    dest: /tmp/
+    remote_src: yes- name: Copy prometheus file to bin
+  copy:
+    src: "/tmp/prometheus-2.8.1.linux-amd64/prometheus"
+    dest: "/usr/local/bin/prometheus"
+    owner: "promU"
+    group: "promG"
+    remote_src: yes
+    mode: 0755- name: Delete prometheus tmp folder
+  file:
+    path: '/tmp/prometheus-2.8.1.linux-amd64'
+    state: absent
+	
+- name: Copy systemd init file
+  template:
+    src: init.service.j2
+    dest: /etc/systemd/system/prometheus.service
+  notify: systemd_reload- name: Start prometheus service
+  service:
+    name: prometheus
+    state: started
+    enabled: yes
+	
+- name: Check if prometheus is accessible
+  uri:
+    url: http://localhost:9090
+    method: GET
+    status_code: 200
