@@ -14,14 +14,16 @@
   unarchive:
     src: "https://github.com/prometheus/prometheus/releases/download/v2.8.1/prometheus-2.8.1.linux-amd64.tar.gz"
     dest: /tmp/
-    remote_src: yes- name: Copy prometheus file to bin
+    remote_src: yes
+- name: Copy prometheus file to bin
   copy:
     src: "/tmp/prometheus-2.8.1.linux-amd64/prometheus"
     dest: "/usr/local/bin/prometheus"
     owner: "promU"
     group: "promG"
     remote_src: yes
-    mode: 0755- name: Delete prometheus tmp folder
+    mode: 0755
+- name: Delete prometheus tmp folder
   file:
     path: '/tmp/prometheus-2.8.1.linux-amd64'
     state: absent
